@@ -14,3 +14,17 @@ def dense_sampling_points(img):
             for y in ys:
                     keypoints.append(cv.KeyPoint(x, y, z))
     return keypoints
+
+def compute_and_save_descriptors(img_list, filename):
+    """Compute the descriptors of all the images and save them into the provided file as a single vstacked array."""
+    sift = cv.SIFT_create()
+    descriptors = []
+
+    for img in img_list:
+        keypoints = dense_sampling_points(img)
+        kp, des = sift.compute(img, keypoints)
+        descriptors.append(des)
+    
+    descriptors = np.vstack(descriptors)
+    np.save(filename, descriptors)
+    return descriptors
