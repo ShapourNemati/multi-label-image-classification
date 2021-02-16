@@ -31,3 +31,18 @@ def compute_codebook(descriptors):
     """Compute the codebook for BoW using K-means and a fixed cluster number of 256."""
     bow_trainer = cv.BOWKMeansTrainer(256)
     return bow_trainer.cluster(descriptors)
+
+def compute_histogram(descriptor, vocabulary):
+    histogram = np.zeros(256)
+    for d in descriptor:
+        min_val = sys.float_info.max
+        min_index = 0
+        i = 0
+        for w in vocabulary:
+            dist = np.linalg.norm(d-w)
+            if (dist < min_val):
+                min_val = dist
+                min_index = i
+            i = i + 1
+        histogram[min_index] = histogram[min_index] + 1
+    return histogram
