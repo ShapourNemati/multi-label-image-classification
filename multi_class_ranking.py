@@ -28,3 +28,8 @@ def compute_and_save_descriptors(img_list, filename):
     descriptors = np.vstack(descriptors)
     np.save(filename, descriptors)
     return descriptors
+
+def compute_codebook(descriptors):
+    """Compute the codebook for BoW using K-means and a fixed cluster number of 256."""
+    bow_trainer = cv.BOWKMeansTrainer(256)
+    return bow_trainer.cluster(descriptors)
