@@ -47,3 +47,17 @@ def compute_histogram(descriptor, vocabulary):
             i = i + 1
         histogram[min_index] = histogram[min_index] + 1
     return histogram
+
+def classify(histogram, model):
+    """Compute the class of the input histogram with respect to the given model."""
+    min_distance = sys.float_info.max
+    min_index = 0
+    distances = []
+    index = 1
+    for m in model:
+        d = np.linalg.norm(m - histogram)
+        if (d < min_distance):
+            min_distance = d
+            min_index = index
+        index = index + 1
+    return min_index
