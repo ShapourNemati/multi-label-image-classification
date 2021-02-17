@@ -33,6 +33,7 @@ def compute_codebook(descriptors):
     return bow_trainer.cluster(descriptors)
 
 def compute_histogram(descriptor, vocabulary):
+    """Compute the histogram of the descriptor with the given vocabulary."""
     histogram = np.zeros(256)
     for d in descriptor:
         min_val = sys.float_info.max
