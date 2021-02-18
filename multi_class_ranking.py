@@ -61,3 +61,23 @@ def classify(histogram, model):
             min_index = index
         index = index + 1
     return min_index
+
+def divide_in_grids(image):
+    """
+    Divides the image in 50 patches.
+    The grids are: 4x2, 2x4, 3x3, and 5x5. 
+    """
+    patches = []
+    xns = (5, 3, 4, 6)
+    yns = (3, 5, 4, 6)
+    for i in range(0, 5):    
+        get_grid_division(image, xns[i], yns[i], patches)
+    return patches
+
+def get_grid_division(image, xn, yn, patches):
+    xs = np.linspace(0, image.shape[1], num = xn)
+    ys = np.linspace(0, image.shape[0], num = yn)
+    for i in range(0, xn - 1):
+        for j in range(0, yn - 1):
+            patch = image[int(ys[j]):int(ys[j+1]), int(xs[i]):int(xs[i+1])]
+            patches.append(patch)
