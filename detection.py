@@ -25,11 +25,10 @@ def subregion_descriptors(descriptors_matrix, x, y, width, height):
             descriptors.append(descriptors_matrix[int(j/step)][int(i/step)])
     return descriptors
 
-def sliding_window_detection(template, img):
+def sliding_window_detection(template, img, desc_mat):
     step = 16
     template_width, template_height, _ = template.shape
     img_width, img_height, _ = img.shape
-    desc_mat = descriptors_matrix(img)
     min_dist = sys.float_info.max
     min_upper_corner = (0, 0)
     template_descriptors = subregion_descriptors(descriptors_matrix(template), 0, 0, template_width, template_height)
@@ -52,7 +51,8 @@ def multi_scale_template_matching(template, img, sizes):
         template_width, template_height, img_width, img_height = size
         resized_template = cv.resize(template, (template_width, template_height))
         resized_img = cv.resize(img, (img_width, img_height))
-        dist, upper_corner = sliding_window_detection(resized_template, resized_img)
+        desc_mat = descriptors_matrix(img)
+        dist, upper_corner = sliding_window_detection(resized_template, resized_img, desc_mat)
         if (dist < min_dist):
             min_dist = dist
             x, y = upper_corner
