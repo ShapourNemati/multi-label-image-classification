@@ -44,22 +44,25 @@ def sliding_window_detection(template, img, desc_mat):
                 min_upper_corner = (i, j)
     return (min_dist, min_upper_corner)
 
-def multi_scale_template_matching(template, img, template_sizes, img_sizes):
-    min_dist = sys.float_info.max
-    x, y, x2, y2 = (0, 0, 0, 0)
+def multi_scale_template_matching(templates, img, template_sizes, img_sizes):
+    matches = []
     for img_size in img_sizes:
         img_width, img_height = img_size
         resized_img = cv.resize(img, (img_width, img_height))
         desc_mat = descriptors_matrix(img)
-        for template_size in template_sizes:
-            template_width, template_height = template_size
-            resized_template = cv.resize(template, (template_width, template_height))
-            dist, upper_corner = sliding_window_detection(resized_template, resized_img, desc_mat)
-            if (dist < min_dist):
-                min_dist = dist
-                x, y = upper_corner
-                x = x / (img.shape[1] / img_width)
-                y = y / (img.shape[0] / img_height)
-                x2 = x + template_width
-                y2 = y + template_height
-    return (min_dist, (x, y), (x2, y2))
+        for template in templates:
+            min_dist = sys.float_info.max
+            x, y, x2, y2 = (0, 0, 0, 0)
+            for template_size in template_sizes:
+                template_width, template_height = template_size
+                resized_template = cv.resize(template, (template_width, template_height))
+                dist, upper_corner = sliding_window_detection(resized_template, resized_img, desc_mat)
+                if (dist < min_dist):
+                    min_dist = dist
+                    x, y = upper_corner
+                    x = x / (img.shape[1] / img_width)
+                    y = y / (img.shape[0] / img_height)
+                    x2 = x + template_width
+                    y2 = y + template_height
+            matches.append((min_dist, (x, y), (x2, y2)))
+    return matches
