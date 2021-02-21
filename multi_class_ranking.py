@@ -70,7 +70,7 @@ def divide_in_grids(image):
     patches = []
     xns = (5, 3, 4, 6)
     yns = (3, 5, 4, 6)
-    for i in range(0, 5):    
+    for i in range(0, 4):    
         get_grid_division(image, xns[i], yns[i], patches)
     return patches
 
