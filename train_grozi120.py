@@ -1,5 +1,6 @@
 import numpy as np
 import cv2 as cv
+import glob
 
 from file_utilities import save_descriptors
 from multi_class_ranking import compute_descriptors, compute_codebook, compute_histogram
@@ -7,22 +8,29 @@ from multi_class_ranking import compute_descriptors, compute_codebook, compute_h
 ### STEP 1
 
 # i = 0
-# images = []
+# image_files = []
 # descriptor_base_name = "descriptor"
-# file_index = 0
+# descriptor_index = 0
 # for x in range(1, 121):
 #     i = i + 1
-#     filename = "E:\\UNI\\VISIONE\\inVitro\\" + str(x) + "\\web\\JPEG\\web1.jpg"
-#     images.append(cv.imread(filename))
+#     folder = "E:\\UNI\\VISIONE\\inVitro\\" + str(x) + "\\\web\\JPEG\\"
+#     files = glob.glob(folder + "*.jpg")
+#     print(files)
+#     image_files.append(files)
 #     if (i >= 10):
-#         print(filename)
-#         descriptor_name = descriptor_base_name + str(file_index)
+#         images = []
+#         for class_files in image_files:
+#             print(class_files)
+#             for filename in class_files:
+#                 print(filename)
+#                 images.append(cv.imread(filename))
+#         descriptor_name = descriptor_base_name + str(descriptor_index)
 #         d = compute_descriptors(images)
 #         save_descriptors(d, descriptor_name)
 #         print(descriptor_name)
-#         images = []
-#         file_index = file_index + 1
+#         descriptor_index = descriptor_index + 1
 #         i = 0
+#         image_files = []
 
 ### STEP 2
 
@@ -36,15 +44,28 @@ from multi_class_ranking import compute_descriptors, compute_codebook, compute_h
 
 ### STEP 3
 
-# v = np.load("vocabulary.npy")
+# i = 0
+# vocabulary = np.load("vocabulary.npy")
 # model = []
-# images = []
+# model_base_name = "model\\model"
 # for x in range(1, 121):
-#     filename = "E:\\UNI\\VISIONE\\inVitro\\" + str(x) + "\\web\\JPEG\\web1.jpg"
-#     img = cv.imread(filename)
-#     print(filename)
-#     d = compute_descriptors(img)
-#     h = compute_histogram(d, v)
-#     model.append(h)
+#     i = i + 1
+#     folder = "E:\\UNI\\VISIONE\\inVitro\\" + str(x) + "\\\web\\JPEG\\"
+#     class_files = glob.glob(folder + "*.jpg")
+#     for filename in class_files:
+#         img = cv.imread(filename)
+#         d = compute_descriptors(img)
+#         h = compute_histogram(d, vocabulary)
+#         h = np.hstack((h, i))
+#         model.append(h)
+#     model_name = model_base_name + str(i)
+#     print(model_name)
+#     save_descriptors(model, model_name)
+#     model = []
 
-# save_descriptors(model, "model")
+model = []
+for x in range(1, 121):
+    filename = "model\\model" + str(x) + ".npy"
+    model.append(np.load(filename))
+
+save_descriptors(model, "model")
