@@ -50,17 +50,15 @@ def compute_histogram(descriptor, vocabulary):
 
 def classify(histogram, model):
     """Compute the class of the input histogram with respect to the given model."""
-    min_distance = sys.float_info.max
-    min_index = 0
     distances = []
-    index = 1
     for m in model:
+        class_index = m[-1]
+        m = m[:-1] # remove last column
         d = np.linalg.norm(m - histogram)
-        if (d < min_distance):
-            min_distance = d
-            min_index = index
-        index = index + 1
-    return min_index
+        distances.append([d, class_index])
+    distances = np.vstack(distances)
+    sorted_indexes = np.argsort(distances[:, 0])
+    return distances[sorted_indexes[0]][1]
 
 def divide_in_grids(image):
     """
