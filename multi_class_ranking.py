@@ -58,7 +58,7 @@ def classify(histogram, model):
         distances.append([d, class_index])
     distances = np.vstack(distances)
     sorted_indexes = np.argsort(distances[:, 0])
-    return distances[sorted_indexes[0]][1]
+    return int(distances[sorted_indexes[0]][1])
 
 def divide_in_grids(image):
     """
