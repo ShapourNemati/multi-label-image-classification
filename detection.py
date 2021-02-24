@@ -27,10 +27,9 @@ def subregion_descriptors(descriptors_matrix, x, y, width, height):
 
 def sliding_window_detection(template, img, desc_mat):
     step = 16
+    candidates = []
     template_width, template_height, _ = template.shape
     img_width, img_height, _ = img.shape
-    min_dist = sys.float_info.max
-    min_upper_corner = (0, 0)
     template_descriptors = subregion_descriptors(descriptors_matrix(template), 0, 0, template_width, template_height)
     for i in range(0, img_height - template_height, step):
         for j in range(0, img_width - template_width, step):
@@ -39,30 +38,72 @@ def sliding_window_detection(template, img, desc_mat):
             for z in range(len(sub_desc)):
                 dist = dist + np.linalg.norm(sub_desc[z] - template_descriptors[z])
             mean_dist = dist / len(sub_desc)
-            if mean_dist < min_dist:
-                min_dist = mean_dist
-                min_upper_corner = (i, j)
-    return (min_dist, min_upper_corner)
+            candidates.append((mean_dist, (i, j), (i + template_width, j + template_height)))
+    return non_maximum_suppression(candidates)
 
-def multi_scale_template_matching(templates, img, template_sizes, img_sizes):
+def intersection_over_union(c1, w1, h1, c2, w2, h2):
+
+    dx = min(c1[0] + w1, c2[0] + w2) - max(c1[0], c2[0])
+    dy = min(c1[1] + w1, c2[1] + w2) - max(c1[1], c2[1])
+    if dx > 0 and dy > 0:
+        intersection = dx * dy
+    else:
+        intersection = 0
+
+    area_1 = w1 * h1
+    area_2 = w2 * h2
+
+    union = area_1 + area_2 - intersection
+
+    return intersection/union
+
+def non_maximum_suppression(candidates):
+    result = []
+    while len(candidates) > 0:
+        min_dist = sys.float_info.max
+        min_index = 0
+        for i in range(len(candidates)):
+            dist, p1, p2 = candidates[i]
+            if dist < min_dist:
+                min_dist = dist
+                min_index = i
+        dist, p1, p2 = candidates[min_index]
+        to_remove = []
+        for i in range(len(candidates)):
+            dist_2, q1, q2 = candidates[i]
+            if intersection_over_union_2(p1, p2, q1, q2) > 0.15:
+                to_remove.append(candidates[i])
+        for x in to_remove:
+            candidates.remove(x)
+        result.append((dist, p1, p2))
+    return result
+
+def intersection_over_union_2(p1, p2, q1, q2):
+    c1 = p1
+    c2 = q1
+
+    w1 = p2[0] - p1[0]
+    h1 = p2[1] - p1[1]
+
+    w2 = q2[0] - q1[0]
+    h2 = q2[1] - q1[1]
+
+    return intersection_over_union(c1, w1, h1, c2, w2, h2)
+
+
+def multi_scale_template_matching(template_base, img, template_sizes, img_sizes):
     matches = []
     for img_size in img_sizes:
         img_width, img_height = img_size
         resized_img = cv.resize(img, (img_width, img_height))
         desc_mat = descriptors_matrix(img)
-        for template in templates:
-            min_dist = sys.float_info.max
-            x, y, x2, y2 = (0, 0, 0, 0)
+        template_matches = []
+        for rot in range(0, 4):
+            template = np.rot90(template_base, rot)
             for template_size in template_sizes:
                 template_width, template_height = template_size
                 resized_template = cv.resize(template, (template_width, template_height))
-                dist, upper_corner = sliding_window_detection(resized_template, resized_img, desc_mat)
-                if (dist < min_dist):
-                    min_dist = dist
-                    x, y = upper_corner
-                    x = x / (img.shape[1] / img_width)
-                    y = y / (img.shape[0] / img_height)
-                    x2 = x + template_width
-                    y2 = y + template_height
-            matches.append((min_dist, (x, y), (x2, y2)))
-    return matches
+                bounding_boxes = sliding_window_detection(resized_template, resized_img, desc_mat)
+                for bounding_box in bounding_boxes:
+                    template_matches.append(bounding_box)
+    return non_maximum_suppression(template_matches)
