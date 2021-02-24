@@ -38,6 +38,7 @@ metadata_filenames = [f for f in glob.glob(folder_name + "*.npy") if "_ranking" 
 #STEP 2 - Calculate mAP
 
 average_precision = []
+average_recall = []
 max_k = 50
 
 for i in range(0, len(metadata_filenames), 15):
@@ -51,13 +52,17 @@ for i in range(0, len(metadata_filenames), 15):
     relevant_items = set(relevant_items)
 
     precision = []
+    recall = []
 
     for k in range(1, max_k + 1):
         if k < len(ranking):
             considered_votes = ranking[:k].flatten()
             true_positives = list(set(considered_votes) & relevant_items)
             precision.append(len(true_positives) / len(considered_votes))
+            recall.append(len(true_positives) / len(relevant_items))
 
     average_precision.append(sum(precision) / len(precision))
+    average_recall.append(sum(recall) / len(recall))
 
 print(sum(average_precision) / len(average_precision))
+print(sum(average_recall) / len(average_recall))
